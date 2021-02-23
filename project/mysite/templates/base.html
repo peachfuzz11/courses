@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>PH et al</title>
+
+    {% load static %}
+    <link href="{% static 'styles/bootstrap.min.css'  %}" rel='stylesheet'>
+    <link href="{% static 'styles/font-awesome.min.css'  %}" rel='stylesheet'>
+    <link href="{% static 'styles/site.css'  %}" rel='stylesheet'>
+    <link href="{% static 'styles/gantt.css'  %}" rel='stylesheet'>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/timeline.js' %}"></script>
+</head>
+<body>
+<div id="navbar" class="nav">
+    <div class="nav-bar">
+        <a href="/"><i class="fa fa-fw fa-home"></i> Home</a>
+        {% if user.is_authenticated %}
+        <a href="/"><i class="fa fa-fw fa-search"></i> Search</a>
+        <a href="/"><i class="fa fa-fw fa-envelope"></i> Contact</a>
+        {% endif %}
+        {% include '_loginpartial.html' %}
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+</div>
+
+<div class="container">
+    {% block 'content' %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

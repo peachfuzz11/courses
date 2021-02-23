@@ -1,0 +1,17 @@
+{% extends 'courses_base.html' %}
+{% block 'courses' %}
+
+<div class="container">
+    {% for model in models %}
+    <div class="row">
+        <h3>Model: {{ model.name }} </h3>
+        <div class="col-md-6">
+            <img src="data:image/png;base64,{{ model.fig1 }}"/>
+        </div>
+        <div class="col-md-6">
+            <img src="data:image/png;base64,{{ model.fig2 }}"/>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

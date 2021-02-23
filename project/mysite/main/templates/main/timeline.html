@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block 'content' %}
+<div class="gantt-header">
+    <h2>Project plan</h2>
+</div>
+<div class="gantt">
+    <div class="gantt-row gantt-row-header">
+        <div></div>
+        <div class="gantt-row-bars">
+            <div style="grid-column: 1/5;">2021</div>
+            <div style="grid-column: 5/9;">2022</div>
+            <div style="grid-column: 9/13;">2023</div>
+            <div style="grid-column: 01/02;">Q1</div>
+            <div style="grid-column: 02/03;">Q2</div>
+            <div style="grid-column: 03/04;">Q3</div>
+            <div style="grid-column: 4/5;">Q4</div>
+            <div style="grid-column: 5/6;">Q1</div>
+            <div style="grid-column: 6/7;">Q2</div>
+            <div style="grid-column: 7/8;">Q3</div>
+            <div style="grid-column: 8/9;">Q4</div>
+            <div style="grid-column: 9/10;">Q1</div>
+            <div style="grid-column: 10/11;">Q2</div>
+            <div style="grid-column: 11/12;">Q3</div>
+            <div style="grid-column: 12/13;">Q4</div>
+        </div>
+        <div class="gantt-grid gantt-row-lines">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-row-first">
+            Project plan
+        </div>
+        <ul class="gantt-row-bars">
+            <li style="grid-column: 1/2;">Analysis of satellite data application</li>
+            <li style="grid-column: 1/2;">Aircraft detection</li>
+            <li style="grid-column: 1/4;">Creation of annotated database</li>
+            <li style="grid-column: 3/7;">Ship/iceberg classification</li>
+            <li style="grid-column: 3/7">AIS-ship correlation and position prediction</li>
+            <li style="grid-column: 7/11;">Dark ship search and track</li>
+            <li style="grid-column: 11/13;">Thesis writing</li>
+        </ul>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-row-first">
+            Courses
+        </div>
+        <ul class="gantt-row-bars">
+            <li style="grid-column: 1/3;">30760 - Inverse problemer og Maskinlæring i rum- og geofysik</li>
+            <li style="grid-column: 2/3;">Machine Learning and Imaging (MLIM)</li>
+            <li style="grid-column: 2/4;">Machine learning self study</li>
+            <li style="grid-column: 3/5;">02456 - Dyb læring</li>
+            <li style="grid-column: 3/5;">30911 - Journal Club in Geophysics, Astrophysics and Space Physics</li>
+            <li style="grid-column: 3/5;">Machine Learning and Imaging Projects (MLIP)</li>
+        </ul>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-row-first">
+            Summer schools
+        </div>
+        <ul class="gantt-row-bars">
+            <li style="grid-column: 3/4;">KTU - PhD Summer School</li>
+            <li style="grid-column: 3/4;">ESA - Summer School Alpbach</li>
+            <li style="grid-column: 3/4;">IGARSS - Summer School</li>
+        </ul>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-row-first">
+            External stays
+        </div>
+        <ul class="gantt-row-bars">
+            <li style="grid-column: 7/8;">Arctic Commando, Greenland</li>
+            <li style="grid-column: 9/10;">Lockheed-Martin Corporation</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

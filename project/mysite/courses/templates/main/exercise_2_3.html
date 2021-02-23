@@ -1,0 +1,34 @@
+{% extends 'courses_base.html' %}
+{% block 'courses' %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <img src="data:image/png;base64,{{ data }}"/>
+        </div>
+    </div>
+    <div class="row">
+        <h2>Boulder</h2>
+        <div class="col-md-12">
+            <h4>All data</h4>
+            <img src="data:image/png;base64,{{ boulder1 }}"/>
+        </div>
+        <div class="col-md-12">
+            <h4>Only data with kp<20</h4>
+            <img src="data:image/png;base64,{{ boulder2 }}"/>
+        </div>
+    </div>
+    <div class="row">
+        <h2>Alaska</h2>
+        <div class="col-md-12">
+            <h4>All data</h4>
+            <img src="data:image/png;base64,{{ alaska1 }}"/>
+        </div>
+
+        <div class="col-md-12">
+            <h4>Only data with kp<20</h4>
+            <img src="data:image/png;base64,{{ alaska2 }}"/>
+        </div>
+    </div>
+</div>
+{% endblock %}
