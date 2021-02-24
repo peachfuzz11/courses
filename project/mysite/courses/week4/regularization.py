@@ -9,7 +9,8 @@ class Regularization:
     def __init__(self, d, year, knots, B, norm=LS, alpha=None):
         self.d = d
         self.B = B
-        self.G = self.B.collmat(year)  # G matrix collocation matrix for function value at sites tau
+        self.year = year
+        self.G = self.B.collmat(self.year)  # G matrix collocation matrix for function value at sites tau
         self.GTG = self.G.T @ self.G
         self.LTL = None
         self.alpha = alpha
@@ -34,6 +35,10 @@ class Regularization:
     def solve(self, alpha):
         return numpy.linalg.lstsq(self.GTG + alpha * self.LTL, self.G.T @ self.d, rcond=None)[0]
 
+    def gcv_trace(self):
+        GG_alpha = numpy.linalg.lstsq(self.GTG + self.alpha * self.LTL, self.G.T, rcond=None)[0]
+        return numpy.trace(numpy.identity(len(self.d)) - self.G @ GG_alpha)
+
     def get_model_params(self):
         return self.model
 
@@ -43,23 +48,38 @@ class Regularization:
         return misfit_norm
 
     def calculate_alpha_discrepancy_principle(self):
-        alphas = [100]
+        alphas = self.guess_alphas()
         n_sigma = len(self.d) * numpy.nanvar(self.d)
         misfits = []
-        misfits.append(self.get_misfit(alphas[-1]) - n_sigma)
-        for i in range(1000):
-            alphas.append(alphas[0] - i / 10)
-            misfits.append(self.get_misfit(alphas[-1]) - n_sigma)
+        for alpha in alphas:
+            misfits.append(self.get_misfit(alpha) - n_sigma)
         return alphas, misfits
 
     def calculate_alpha_knee(self):
-        alphas = [100]
+        alphas = self.guess_alphas()
         misfits = []
-        misfits.append(self.get_misfit(alphas[-1]))
-        for i in range(1000):
-            alphas.append(alphas[0] - i / 10)
-            misfits.append(self.get_misfit(alphas[-1]))
-        return alphas, misfits
+        model_norm = []
+        for alpha in alphas:
+            model_norm.append(self.solve(alpha).T @ self.LTL @ self.solve(alpha))
+            misfits.append(self.get_misfit(alpha))
+        return alphas, misfits, model_norm
 
     def calculate_gcv(self):
+        alphas = self.guess_alphas()[::20]
+        gcv = numpy.zeros(len(alphas))
+        for i in range(len(self.d)):
+            datum = self.d[i]
+            datum_year = self.year[i]
+            d = numpy.delete(self.d, i)
+            year = numpy.delete(self.year, i)
+            G_k = self.B.collmat(datum_year)
+            for j in range(len(alphas)):
+                reg = Regularization(d, year, self.knots, self.B, self.norm, alphas[j]).system_solve()
+                m_alpha = reg.get_model_params()
+                misfit = numpy.square((G_k @ m_alpha - datum) / reg.gcv_trace())
+                # trace = self.gcv_trace(alphas[j])
+                gcv[j] += misfit
+        return gcv, alphas
 
+    def guess_alphas(self):
+        return numpy.geomspace(0.001, 1000, num=1000)

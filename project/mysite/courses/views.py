@@ -57,10 +57,8 @@ def exercise_3_1(request):
     img2 = Figurehelper(fig).to_png()
 
     # order of spline, cubic = 4\n
-    p = 4
     step = 2
     knots = numpy.arange(1951 - step, 2015 + 2 * step, step)
-
     # Predictions
     spline_order = 4
     k = splinelab.augknt(knots, spline_order)  # add endpoint repeats as appropriate for spline order p
@@ -73,23 +71,21 @@ def exercise_3_1(request):
     m_sm_spline = Regularization(anomaly_10yr_mean_rm, year_rm, knots, B, norm=Regularization.SM_SPLINE,
                                  alpha=0.1).system_solve()
     xx = numpy.linspace(1951, 2015, 1000)
-    ## Estimate predictions for Tikhonov and smooth spline here
+
     y0 = numpy.array([numpy.sum(B(x) * m_lsq.get_model_params()) for x in xx])
     y1 = numpy.array([numpy.sum(B(x) * m_tikh.get_model_params()) for x in xx])
     y2 = numpy.array([numpy.sum(B(x) * m_sm_spline.get_model_params()) for x in xx])
-    fig, ax = pyplot.subplots(figsize=(12, 6))
-    ax.plot(year, anomaly_10yr_mean, 'ok', label="Removed", fillstyle='none', markersize=10)
-    ax.plot(year_rm, anomaly_10yr_mean_rm, 'or', label="Annual running means", fillstyle='none', markersize=10)
-    ax.plot(xx, y0, '-', label='Lsq spline')
-    ax.plot(xx, y1, '-', label='Tikh spline')
-    ax.plot(xx, y2, '-', label='SM spline')
-    ax.set_xlabel("Year")
-    ax.set_ylabel("SOI index")
-    ax.set_title("Southern Oscillation Index models (data for 1970-1975 removed)")
-    ax.set_xticks(numpy.arange(1950, 2015 + 5, 5))
-    ax.grid()
-    ax.legend(loc="upper left")
-    img3 = Figurehelper(fig).to_png()
+    fig3, ax3 = pyplot.subplots(figsize=(12, 6))
+    ax3.plot(year, anomaly_10yr_mean, 'ok', label="Removed", fillstyle='none', markersize=10)
+    ax3.plot(year_rm, anomaly_10yr_mean_rm, 'or', label="Annual running means", fillstyle='none', markersize=10)
+    ax3.plot(xx, y0, '-', label='Lsq spline')
+    ax3.plot(xx, y1, '-', label='Tikh spline alpha=1')
+    ax3.plot(xx, y2, '-', label='SM spline alpha=0.1')
+    ax3.set_xlabel("Year")
+    ax3.set_ylabel("SOI index")
+    ax3.set_title("Southern Oscillation Index models (data for 1970-1975 removed)")
+    ax3.set_xticks(numpy.arange(1950, 2015 + 5, 5))
+    ax3.grid()
 
     tikh_alphas, tikh_misfit = m_tikh.calculate_alpha_discrepancy_principle()
     tikh_alpha = tikh_alphas[numpy.argmin(numpy.abs(tikh_misfit))]
@@ -97,31 +93,99 @@ def exercise_3_1(request):
     sm_alpha = sm_alphas[numpy.argmin(numpy.abs(sm_misfit))]
 
     fig, ax = pyplot.subplots(figsize=(12, 6))
-    ax.plot(numpy.square(tikh_misfit),tikh_alphas,  '-', label='Tikh alpha= ' + str(numpy.round(tikh_alpha, 1)))
-    ax.plot(numpy.square(sm_misfit),sm_alphas,  '-', label='SM alpha= ' + str(numpy.round(sm_alpha, 1)))
+    ax.plot(tikh_alphas, numpy.square(tikh_misfit), '-', label='Tikh alpha= ' + str(numpy.round(tikh_alpha, 1)))
+    ax.plot(sm_alphas, numpy.square(sm_misfit), '-', label='SM alpha= ' + str(numpy.round(sm_alpha, 1)))
     # ax.plot(xx, y1, '-', label='Tikh spline')
     # ax.plot(xx, y2, '-', label='SM spline')
-    ax.set_xlabel("Misfit norm")
-    ax.set_ylabel("Alpha")
+    ax.set_ylabel("Misfit norm")
+    ax.set_xlabel("Alpha")
     ax.set_title("Discrepancy principle")
     ax.legend(loc="upper left")
     img4 = Figurehelper(fig).to_png()
 
-    tikh_alphas, tikh_misfit = m_tikh.calculate_alpha_knee()
-    tikh_alpha = tikh_alphas[numpy.argmin(numpy.abs(tikh_misfit))]
-    sm_alphas, sm_misfit = m_sm_spline.calculate_alpha_knee()
-    sm_alpha = sm_alphas[numpy.argmin(numpy.abs(sm_misfit))]
+    tikh_alphas, tikh_misfit, tikh_model_norm = m_tikh.calculate_alpha_knee()
+    tikh_curvature = numpy.abs(numpy.gradient(numpy.gradient(tikh_misfit))) + numpy.abs(
+        numpy.gradient(numpy.gradient(tikh_model_norm)))
+    tikh_alpha = tikh_alphas[numpy.argmax(tikh_curvature)]
+    tikh_alpha = numpy.round(numpy.sqrt(tikh_alpha), 2)
+    sm_alphas, sm_misfit, sm_model_norm = m_sm_spline.calculate_alpha_knee()
+    sm_curvature = numpy.abs(numpy.gradient(numpy.gradient(sm_misfit))) + numpy.abs(
+        numpy.gradient(numpy.gradient(sm_model_norm)))
+    sm_alpha = sm_alphas[numpy.argmax(sm_curvature)]
+    sm_alpha = numpy.round(numpy.sqrt(sm_alpha), 2)
 
-    fig, ax = pyplot.subplots(figsize=(12, 6))
-    ax.plot(numpy.square(tikh_misfit), tikh_alphas, '-', label='Tikh alpha= ' + str(numpy.round(tikh_alpha, 1)))
-    ax.plot(numpy.square(sm_misfit), sm_alphas, '-', label='SM alpha= ' + str(numpy.round(sm_alpha, 1)))
+    fig, ax = pyplot.subplots(figsize=(6, 6))
+    ax.plot(tikh_misfit, tikh_model_norm, '-', label='Tikh alpha= ' + str(tikh_alpha))
+    ax.plot(sm_misfit, sm_model_norm, '-', label='SM alpha= ' + str(sm_alpha))
     # ax.plot(xx, y1, '-', label='Tikh spline')
     # ax.plot(xx, y2, '-', label='SM spline')
     ax.set_xlabel("Misfit norm")
-    ax.set_ylabel("Alpha")
-    ax.set_title("Knee")
+    ax.set_ylabel("Model norm m_a.T@LTL@m_a")
+    ax.set_title("Knee - model norm vs misfit")
     ax.legend(loc="upper left")
     img5 = Figurehelper(fig).to_png()
+
+    fig, ax = pyplot.subplots(figsize=(6, 6))
+    ax.plot(tikh_alphas, tikh_curvature, '-', label='Tikh alpha= ' + str(tikh_alpha))
+    ax.plot(sm_alphas, sm_curvature, '-', label='SM alpha= ' + str(sm_alpha))
+    ax.set_xscale('log')
+    ax.set_xlabel("alpha")
+    ax.set_ylabel("Curvature")
+    ax.set_title("Curvature vs alpha")
+    ax.legend(loc="upper left")
+    img6 = Figurehelper(fig).to_png()
+
+    fig, ax = pyplot.subplots(figsize=(6, 6))
+    ax.plot(tikh_alphas, tikh_model_norm, '-', label='Tikh alpha= ' + str(tikh_alpha))
+    ax.plot(sm_alphas, sm_model_norm, '-', label='SM alpha= ' + str(sm_alpha))
+    ax.set_xlabel("alpha")
+    ax.set_ylabel("Model norm")
+    ax.set_title("Model norm vs alpha")
+    ax.legend(loc="upper left")
+    img7 = Figurehelper(fig).to_png()
+
+    fig, ax = pyplot.subplots(figsize=(6, 6))
+    ax.plot(tikh_alphas, tikh_misfit, '-', label='Tikh alpha= ' + str(tikh_alpha))
+    ax.plot(sm_alphas, sm_misfit, '-', label='SM alpha= ' + str(sm_alpha))
+    ax.set_xlabel("alpha")
+    ax.set_ylabel("Misfit norm")
+    ax.set_title("misfit vs alpha")
+    ax.legend(loc="upper left")
+    img8 = Figurehelper(fig).to_png()
+
+    fig, ax = pyplot.subplots(figsize=(12, 6))
+    tikh_gcv, tikh_alphas = m_tikh.calculate_gcv()
+    tikh_gcv_alpha = numpy.round(tikh_alphas[numpy.argmin(tikh_gcv)])
+    sm_gcv, sm_alphas = m_sm_spline.calculate_gcv()
+    sm_gcv_alpha = sm_alphas[numpy.argmin(tikh_gcv)]
+
+    ax.plot(tikh_alphas, tikh_gcv, '-', label='Tikh alpha= ' + str(numpy.round(tikh_gcv_alpha, 2)))
+    ax.plot(sm_alphas, sm_gcv, '-', label='SM alpha= ' + str(numpy.round(sm_gcv_alpha, 2)))
+    ax.set_xlabel("alpha")
+    ax.set_ylabel("gcv")
+    ax.set_xscale('log')
+    ax.set_title("GCV")
+    ax.legend(loc="upper left")
+    img9 = Figurehelper(fig).to_png()
+
+    m_tikh_desc = Regularization(anomaly_10yr_mean_rm, year_rm, knots, B, norm=Regularization.TIKH,
+                                 alpha=tikh_alpha).system_solve()
+    m_sm_spline_desc = Regularization(anomaly_10yr_mean_rm, year_rm, knots, B, norm=Regularization.SM_SPLINE,
+                                      alpha=sm_alpha).system_solve()
+    m_tikh_gcv = Regularization(anomaly_10yr_mean_rm, year_rm, knots, B, norm=Regularization.TIKH,
+                                alpha=tikh_gcv_alpha).system_solve()
+    m_sm_spline_gcv = Regularization(anomaly_10yr_mean_rm, year_rm, knots, B, norm=Regularization.SM_SPLINE,
+                                     alpha=sm_gcv_alpha).system_solve()
+    y4 = numpy.array([numpy.sum(B(x) * m_tikh_desc.get_model_params()) for x in xx])
+    y5 = numpy.array([numpy.sum(B(x) * m_sm_spline_desc.get_model_params()) for x in xx])
+    y6 = numpy.array([numpy.sum(B(x) * m_tikh_gcv.get_model_params()) for x in xx])
+    y7 = numpy.array([numpy.sum(B(x) * m_sm_spline_gcv.get_model_params()) for x in xx])
+    ax3.plot(xx, y4, '-', label='tikh desc alpha=' + str(numpy.round(tikh_alpha, 2)))
+    ax3.plot(xx, y5, '-', label='SM desc alpha=' + str(numpy.round(sm_alpha, 2)))
+    ax3.plot(xx, y6, '-', label='tikh gcv alpha=' + str(numpy.round(tikh_gcv_alpha, 2)))
+    ax3.plot(xx, y7, '-', label='SM gcv alpha=' + str(numpy.round(sm_gcv_alpha, 2)))
+    ax3.legend(loc="upper left")
+    img3 = Figurehelper(fig3).to_png()
 
     return render(request, 'main/exercise_3_1.html', {
         'img1': img1,
@@ -129,6 +193,10 @@ def exercise_3_1(request):
         'img3': img3,
         'img4': img4,
         'img5': img5,
+        'img6': img6,
+        'img7': img7,
+        'img8': img8,
+        'img9': img9,
     })
 
 

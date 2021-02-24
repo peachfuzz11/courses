@@ -2,9 +2,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 
 from main import views
-from main.forms import AuthenticationForm
-from satellite.views import satellite
-from stocks.views import stocks
+
+from project.mysite.main.forms import AuthenticationForm
 
 urlpatterns = [
     path(r'', views.index, name='index'),
