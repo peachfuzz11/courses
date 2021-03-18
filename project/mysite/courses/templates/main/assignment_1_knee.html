@@ -1,0 +1,13 @@
+{% extends 'courses_base.html' %}
+{% block 'courses' %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+        {% for img in l1_imgs %}
+            <img src="data:image/png;base64,{{ img }}"/>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

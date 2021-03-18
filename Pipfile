@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
+Django = "*"
 numpy = "*"
 bspline = "*"
 matplotlib = "*"
 scipy = "*"
+chaosmagpy = "*"
+cartopy = "*"
 
 [dev-packages]
 
